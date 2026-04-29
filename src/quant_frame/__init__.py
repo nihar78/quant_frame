@@ -11,6 +11,7 @@ from .core.model_strategy import BaseModelStrategy, ModelRegistry
 from .core.models import TimeSeriesObservation
 from .core.validators import ThresholdValidator
 from .repository.postgres_repo import SQLAlchemyRepository
+from .validation.evaluator import WalkForwardEvaluator
 from .validation.splitter import WalkForwardSplitter
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "TimeSeriesAligner",
     "TimeSeriesTransformer",
     "TimeSeriesObservation",
+    "WalkForwardEvaluator",
     "WalkForwardSplitter",
     "ZScoreScaler",
 ]
