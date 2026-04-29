@@ -3,6 +3,7 @@
 from .adapters.csv_provider import CSVProvider
 from .adapters.yahoo_provider import YahooFinanceProvider
 from .analytics.aligner import TimeSeriesAligner
+from .analytics.transformer import TimeSeriesTransformer
 from .core.config import PipelineConfig
 from .core.interfaces import BaseProvider, BaseRepository
 from .core.model_strategy import BaseModelStrategy, ModelRegistry
@@ -22,6 +23,7 @@ __all__ = [
     "SQLAlchemyRepository",
     "ThresholdValidator",
     "TimeSeriesAligner",
+    "TimeSeriesTransformer",
     "TimeSeriesObservation",
 ]
 
