@@ -5,6 +5,7 @@ from .core.interfaces import BaseProvider, BaseRepository
 from .core.model_strategy import BaseModelStrategy, ModelRegistry
 from .core.models import TimeSeriesObservation
 from .core.validators import ThresholdValidator
+from .repository.postgres_repo import SQLAlchemyRepository
 
 __all__ = [
     "BaseModelStrategy",
@@ -13,6 +14,7 @@ __all__ = [
     "hello_frame",
     "ModelRegistry",
     "PipelineConfig",
+    "SQLAlchemyRepository",
     "ThresholdValidator",
     "TimeSeriesObservation",
 ]
