@@ -1,5 +1,6 @@
 """quant_frame - Core quantitative analysis framework."""
 
+from .adapters.csv_provider import CSVProvider
 from .core.config import PipelineConfig
 from .core.interfaces import BaseProvider, BaseRepository
 from .core.model_strategy import BaseModelStrategy, ModelRegistry
@@ -11,6 +12,7 @@ __all__ = [
     "BaseModelStrategy",
     "BaseProvider",
     "BaseRepository",
+    "CSVProvider",
     "hello_frame",
     "ModelRegistry",
     "PipelineConfig",
