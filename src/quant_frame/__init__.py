@@ -4,6 +4,7 @@ from .core.config import PipelineConfig
 from .core.interfaces import BaseProvider, BaseRepository
 from .core.model_strategy import BaseModelStrategy, ModelRegistry
 from .core.models import TimeSeriesObservation
+from .core.validators import ThresholdValidator
 
 __all__ = [
     "BaseModelStrategy",
@@ -12,6 +13,7 @@ __all__ = [
     "hello_frame",
     "ModelRegistry",
     "PipelineConfig",
+    "ThresholdValidator",
     "TimeSeriesObservation",
 ]
 
