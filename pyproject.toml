@@ -18,6 +18,7 @@ dependencies = [
     "sqlalchemy",
     "requests",
     "pyyaml",
+    "yfinance",
 ]
 
 [tool.setuptools.packages.find]
@@ -25,3 +26,10 @@ where = ["src"]
 
 [tool.setuptools.package-dir]
 quant_frame = "src/quant_frame"
+
+[tool.mypy]
+plugins = []
+
+[[tool.mypy.overrides]]
+module = "yfinance"
+ignore_missing_imports = true
