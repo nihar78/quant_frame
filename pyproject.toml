@@ -18,6 +18,7 @@ dependencies = [
     "sqlalchemy",
     "requests",
     "pyyaml",
+    "joblib",
     "yfinance",
 ]
 
@@ -32,4 +33,16 @@ plugins = []
 
 [[tool.mypy.overrides]]
 module = "yfinance"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "joblib"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "hmmlearn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "xgboost"
 ignore_missing_imports = true
