@@ -3,6 +3,7 @@
 from .adapters.csv_provider import CSVProvider
 from .adapters.yahoo_provider import YahooFinanceProvider
 from .analytics.aligner import TimeSeriesAligner
+from .analytics.scalers import ZScoreScaler
 from .analytics.transformer import TimeSeriesTransformer
 from .core.config import PipelineConfig
 from .core.interfaces import BaseProvider, BaseRepository
@@ -25,6 +26,7 @@ __all__ = [
     "TimeSeriesAligner",
     "TimeSeriesTransformer",
     "TimeSeriesObservation",
+    "ZScoreScaler",
 ]
 
 
