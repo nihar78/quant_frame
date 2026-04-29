@@ -17,6 +17,7 @@ dependencies = [
     "xgboost",
     "sqlalchemy",
     "requests",
+    "pyyaml",
 ]
 
 [tool.setuptools.packages.find]
