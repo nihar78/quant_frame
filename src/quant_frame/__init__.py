@@ -7,20 +7,23 @@ from .analytics.scalers import ZScoreScaler
 from .analytics.transformer import TimeSeriesTransformer
 from .core.config import PipelineConfig
 from .core.interfaces import BaseProvider, BaseRepository
+from .core.metrics import BaseMetrics
 from .core.model_strategy import BaseModelStrategy, ModelRegistry
 from .core.models import TimeSeriesObservation
 from .core.validators import ThresholdValidator
+from .performance import FinancialMetrics
 from .repository.postgres_repo import SQLAlchemyRepository
 from .strategies.xgboost_strategy import XGBoostStrategy
 from .validation.evaluator import WalkForwardEvaluator
 from .validation.splitter import WalkForwardSplitter
 
 __all__ = [
+    "BaseMetrics",
     "BaseModelStrategy",
     "BaseProvider",
     "BaseRepository",
     "CSVProvider",
-    "YahooFinanceProvider",
+    "FinancialMetrics",
     "hello_frame",
     "ModelRegistry",
     "PipelineConfig",
