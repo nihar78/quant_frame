@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quant_frame"
+version = "0.1.0"
+description = "A quantitative time-series framework"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pytest",
+    "pydantic",
+    "pandas",
+    "numpy",
+    "hmmlearn",
+    "xgboost",
+    "sqlalchemy",
+    "requests",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+quant_frame = "src/quant_frame"
