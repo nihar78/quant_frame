@@ -23,6 +23,7 @@ dependencies = [
     "yfinance",
     "duckdb",
     "gymnasium",
+    "stable-baselines3",
 ]
 
 [tool.setuptools.packages.find]
@@ -56,4 +57,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "gymnasium.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "stable_baselines3.*"
 ignore_missing_imports = true
