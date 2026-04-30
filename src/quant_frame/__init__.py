@@ -11,7 +11,7 @@ from .core.metrics import BaseMetrics
 from .core.model_strategy import BaseModelStrategy, ModelRegistry
 from .core.models import TimeSeriesObservation
 from .core.validators import ThresholdValidator
-from .performance import FinancialMetrics
+from .performance import FinancialMetrics, VectorizedSimulator
 from .repository.postgres_repo import SQLAlchemyRepository
 from .strategies.xgboost_strategy import XGBoostStrategy
 from .validation.evaluator import WalkForwardEvaluator
@@ -33,6 +33,7 @@ __all__ = [
     "TimeSeriesTransformer",
     "TimeSeriesObservation",
     "WalkForwardEvaluator",
+    "VectorizedSimulator",
     "WalkForwardSplitter",
     "XGBoostStrategy",
     "ZScoreScaler",
