@@ -41,14 +41,14 @@ class TestXGBoostStrategy:
     def test_train_fits_model_without_crashing(self, dummy_df: pd.DataFrame) -> None:
         """``train`` correctly fits an XGBRegressor on a dummy DataFrame."""
         strategy = XGBoostStrategy(hyperparams={"n_estimators": 10, "max_depth": 3})
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"], target_col="target")
+        strategy.train(dummy_df, features=["feat_a", "feat_b"], target="target")
         assert strategy._is_fitted is True
 
     def test_predict_returns_numpy_array(self, dummy_df: pd.DataFrame) -> None:
         """``predict`` returns a numpy array after training."""
         strategy = XGBoostStrategy(hyperparams={"n_estimators": 10, "max_depth": 3})
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"], target_col="target")
-        preds = strategy.predict(dummy_df, feature_cols=["feat_a", "feat_b"])
+        strategy.train(dummy_df, features=["feat_a", "feat_b"], target="target")
+        preds = strategy.predict(dummy_df, features=["feat_a", "feat_b"])
         assert isinstance(preds, np.ndarray)
         assert preds.shape == (len(dummy_df),)
 
@@ -56,12 +56,12 @@ class TestXGBoostStrategy:
         """Calling ``predict`` before ``train`` raises NotFittedError or ValueError."""
         strategy = XGBoostStrategy()
         with pytest.raises((ValueError, Exception)):
-            strategy.predict(dummy_df, feature_cols=["feat_a", "feat_b"])
+            strategy.predict(dummy_df, features=["feat_a", "feat_b"])
 
     def test_save_writes_model_to_disk(self, dummy_df: pd.DataFrame, tmp_path: Path) -> None:
         """``save`` successfully writes the model to disk."""
         strategy = XGBoostStrategy(hyperparams={"n_estimators": 10, "max_depth": 3})
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"], target_col="target")
+        strategy.train(dummy_df, features=["feat_a", "feat_b"], target="target")
         filepath = tmp_path / "xgboost_model.json"
         strategy.save(str(filepath))
         assert filepath.exists()
@@ -77,5 +77,5 @@ class TestXGBoostStrategy:
             }
         )
         strategy = XGBoostStrategy(hyperparams={"n_estimators": 10, "max_depth": 3})
-        strategy.train(df, feature_cols=["feat_a", "feat_b"], target_col="target")
+        strategy.train(df, features=["feat_a", "feat_b"], target="target")
         assert strategy._is_fitted is True

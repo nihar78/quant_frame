@@ -48,23 +48,23 @@ class TestGaussianHMMStrategy:
     def test_train_fits_model_without_crashing(self, dummy_df: pd.DataFrame) -> None:
         """``train`` correctly fits a GaussianHMM on a dummy DataFrame."""
         strategy = GaussianHMMStrategy(n_components=2, covariance_type="full")
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"])
+        strategy.train(dummy_df, features=["feat_a", "feat_b"])
         assert strategy._is_fitted is True
         assert strategy._model is not None
 
     def test_train_ignores_target_col(self, dummy_df: pd.DataFrame) -> None:
-        """``train`` does not use *target_col* even when it is provided."""
+        """``train`` does not use *target* even when it is provided."""
         df = dummy_df.copy()
         df["target"] = np.random.default_rng(42).random(len(df))
         strategy = GaussianHMMStrategy(n_components=2)
-        # Should not raise, and should ignore target_col completely
-        strategy.train(df, feature_cols=["feat_a", "feat_b"], target_col="target")
+        # Should not raise, and should ignore target completely
+        strategy.train(df, features=["feat_a", "feat_b"], target="target")
         assert strategy._is_fitted is True
 
     def test_train_accepts_none_target_col(self, dummy_df: pd.DataFrame) -> None:
-        """``train`` accepts ``target_col=None`` without failing."""
+        """``train`` accepts ``target=None`` without failing."""
         strategy = GaussianHMMStrategy(n_components=2)
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"], target_col=None)
+        strategy.train(dummy_df, features=["feat_a", "feat_b"], target=None)
         assert strategy._is_fitted is True
 
     def test_train_drops_nans(self) -> None:
@@ -76,14 +76,14 @@ class TestGaussianHMMStrategy:
             }
         )
         strategy = GaussianHMMStrategy(n_components=2)
-        strategy.train(df, feature_cols=["feat_a", "feat_b"])
+        strategy.train(df, features=["feat_a", "feat_b"])
         assert strategy._is_fitted is True
 
     def test_predict_returns_numpy_array_of_ints(self, dummy_df: pd.DataFrame) -> None:
         """``predict`` returns a numpy array of integer hidden-state labels."""
         strategy = GaussianHMMStrategy(n_components=2, covariance_type="full")
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"])
-        preds = strategy.predict(dummy_df, feature_cols=["feat_a", "feat_b"])
+        strategy.train(dummy_df, features=["feat_a", "feat_b"])
+        preds = strategy.predict(dummy_df, features=["feat_a", "feat_b"])
         assert isinstance(preds, np.ndarray)
         assert preds.shape == (len(dummy_df),)
         assert np.issubdtype(preds.dtype, np.integer)
@@ -93,12 +93,12 @@ class TestGaussianHMMStrategy:
         """Calling ``predict`` before ``train`` raises NotFittedError or ValueError."""
         strategy = GaussianHMMStrategy()
         with pytest.raises((ValueError, Exception)):
-            strategy.predict(dummy_df, feature_cols=["feat_a", "feat_b"])
+            strategy.predict(dummy_df, features=["feat_a", "feat_b"])
 
     def test_save_writes_model_to_disk(self, dummy_df: pd.DataFrame, tmp_path: Path) -> None:
         """``save`` successfully writes the model to disk using joblib."""
         strategy = GaussianHMMStrategy(n_components=2, covariance_type="full")
-        strategy.train(dummy_df, feature_cols=["feat_a", "feat_b"])
+        strategy.train(dummy_df, features=["feat_a", "feat_b"])
         filepath = tmp_path / "hmm_model.joblib"
         strategy.save(str(filepath))
         assert filepath.exists()

@@ -37,8 +37,8 @@ class XGBoostStrategy(BaseModelStrategy):
         >>> from quant_frame.strategies.xgboost_strategy import XGBoostStrategy
         >>> df = pd.DataFrame({"x": [1.0, 2.0, 3.0], "y": [1.0, 2.0, 3.0]})
         >>> strategy = XGBoostStrategy(hyperparams={"n_estimators": 10})
-        >>> strategy.train(df, feature_cols=["x"], target_col="y")
-        >>> preds = strategy.predict(df, feature_cols=["x"])
+        >>> strategy.train(df, features=["x"], target="y")
+        >>> preds = strategy.predict(df, features=["x"])
     """
 
     def __init__(self, hyperparams: dict[str, Any] | None = None) -> None:
@@ -54,47 +54,47 @@ class XGBoostStrategy(BaseModelStrategy):
     def train(
         self,
         df: pd.DataFrame,
-        feature_cols: list[str],
-        target_col: str | None = None,
+        features: list[str],
+        target: str | None = None,
     ) -> None:
         """Fit the underlying XGBRegressor on the supplied data.
 
-        Any rows containing NaN values across the requested *feature_cols* or
-        the *target_col* are silently dropped before fitting.
+        Any rows containing NaN values across the requested *features* or
+        the *target* are silently dropped before fitting.
 
         Args:
             df: Input tabular data containing both features and the response.
-            feature_cols: Ordered list of column names used as explanatory
+            features: Ordered list of column names used as explanatory
                 variables.
-            target_col: Name of the column in *df* that contains the target
+            target: Name of the column in *df* that contains the target
                 variable.
 
         Raises:
-            ValueError: If *target_col* is ``None``.
+            ValueError: If *target* is ``None``.
         """
-        if target_col is None:
-            raise ValueError("target_col must be provided for XGBoostStrategy.train()")
+        if target is None:
+            raise ValueError("target must be provided for XGBoostStrategy.train()")
 
-        subset = df[feature_cols + [target_col]].dropna()
+        subset = df[features + [target]].dropna()
         if len(subset) < len(df):
             LOGGER.info(
                 "Dropped %d row(s) with NaN values before training.",
                 len(df) - len(subset),
             )
 
-        x = subset[feature_cols].to_numpy(dtype=np.float64)
-        y = subset[target_col].to_numpy(dtype=np.float64)
+        x = subset[features].to_numpy(dtype=np.float64)
+        y = subset[target].to_numpy(dtype=np.float64)
 
         self._model = XGBRegressor(**self.hyperparams)
         self._model.fit(x, y)
         self._is_fitted = True
 
-    def predict(self, df: pd.DataFrame, feature_cols: list[str]) -> np.ndarray:
+    def predict(self, df: pd.DataFrame, features: list[str]) -> np.ndarray:
         """Generate predictions using the trained XGBRegressor.
 
         Args:
             df: Input tabular data containing the explanatory variables.
-            feature_cols: Ordered list of column names the model was trained on.
+            features: Ordered list of column names the model was trained on.
 
         Returns:
             A one-dimensional NumPy array of predicted values with length equal
@@ -108,7 +108,7 @@ class XGBoostStrategy(BaseModelStrategy):
                 "The model has not been fitted yet. Call train() before predict()."
             )
 
-        x = df[feature_cols].to_numpy(dtype=np.float64)
+        x = df[features].to_numpy(dtype=np.float64)
         return self._model.predict(x)
 
     def save(self, filepath: str) -> None:
