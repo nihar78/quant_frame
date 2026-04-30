@@ -13,11 +13,13 @@ from .core.models import TimeSeriesObservation
 from .core.validators import ThresholdValidator
 from .performance import FinancialMetrics, plot_financial_tearsheet, VectorizedSimulator
 from .repository.postgres_repo import SQLAlchemyRepository
+from .rl import AllocationEnv
 from .strategies.xgboost_strategy import XGBoostStrategy
 from .validation.evaluator import WalkForwardEvaluator
 from .validation.splitter import WalkForwardSplitter
 
 __all__ = [
+    "AllocationEnv",
     "BaseMetrics",
     "BaseModelStrategy",
     "BaseProvider",
