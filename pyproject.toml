@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "mypy", "pytest-cov", "mkdocs-material", "mkdocstrings[python]"]
+dev = ["pytest", "mypy", "pytest-cov", "mkdocs-material", "mkdocstrings[python]", "pandas-stubs", "types-PyYAML"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

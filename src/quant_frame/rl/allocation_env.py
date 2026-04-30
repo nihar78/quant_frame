@@ -131,7 +131,7 @@ class AllocationEnv(gym.Env[npt.NDArray[np.float32], npt.NDArray[np.float32]]):
                 (len(self.feature_cols) + 1,), dtype=np.float32
             )
         else:
-            observation = self._get_observation()
+            observation = self._get_observation()  # type: ignore[assignment]
 
         return observation, float(reward), terminated, truncated, {}
 
