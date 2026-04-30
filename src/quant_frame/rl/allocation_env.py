@@ -110,6 +110,9 @@ class AllocationEnv(gym.Env[npt.NDArray[np.float32], npt.NDArray[np.float32]]):
             truncated: Always ``False`` for this environment.
             info: An empty dictionary.
         """
+        if self.current_step >= len(self.data):
+            return np.zeros((len(self.feature_cols) + 1,), dtype=np.float32), 0.0, True, False, {}
+
         action_value = float(action[0])
         target_value = float(
             self.data[self.target_col].iloc[self.current_step]

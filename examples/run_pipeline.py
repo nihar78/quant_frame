@@ -23,13 +23,13 @@ _SRC_DIR = os.path.join(_SCRIPT_DIR, "..", "src")
 if _SRC_DIR not in sys.path:
     sys.path.insert(0, _SRC_DIR)
 
-import matplotlib
+import matplotlib  # noqa: E402
 
-matplotlib.use("Agg")  # non-interactive backend for headless environments
+matplotlib.use("Agg")  # non-interactive backend for headless environments  # noqa: E402
 
-import pandas as pd
+import pandas as pd  # noqa: E402
 
-from quant_frame import (
+from quant_frame import (  # noqa: E402
     YahooFinanceProvider,
     TimeSeriesAligner,
     TimeSeriesTransformer,
@@ -41,7 +41,7 @@ from quant_frame import (
     FinancialMetrics,
     plot_financial_tearsheet,
 )
-from quant_frame.strategies import PPOStrategy
+from quant_frame.strategies import PPOStrategy  # noqa: E402
 
 
 def observations_to_dataframe(observations: list) -> pd.DataFrame:
@@ -79,7 +79,7 @@ def main() -> None:
     # 3. FEATURE ENGINEERING
     print("\n[3/8] Feature Engineering")
     df["daily_return"] = df["Close"].pct_change()
-    df["target_binary"] = (df["daily_return"].shift(-1) > 0).astype(int)
+    df["target_binary"] = np.where(df["daily_return"].shift(-1) > 0, 1, -1)
     df["target_return"] = df["daily_return"].shift(-1)
     df = df.dropna()
     print(f"    After base features + dropna: {len(df):,} rows.")
