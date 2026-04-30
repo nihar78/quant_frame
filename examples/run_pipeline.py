@@ -5,11 +5,12 @@ This script orchestrates the full quant workflow:
 
 1. Data ingestion via YahooFinanceProvider
 2. Time-series alignment (resample + forward-fill)
-3. Feature engineering (daily returns, binary target, lags, moving averages)
+3. Feature engineering (daily returns, binary target, continuous target, lags, moving averages)
 4. Walk-forward evaluation with XGBoost
-5. Vectorized back-test simulation
-6. Financial metrics computation
-7. Tearsheet plotting
+5. Walk-forward evaluation with PPO Agent
+6. Vectorized back-test simulation for both
+7. Financial metrics computation for both
+8. Tearsheet plotting for both
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ from quant_frame import (
     FinancialMetrics,
     plot_financial_tearsheet,
 )
+from quant_frame.strategies import PPOStrategy
 
 
 def observations_to_dataframe(observations: list) -> pd.DataFrame:
@@ -60,7 +62,7 @@ def main() -> None:
     print("=" * 60)
 
     # 1. INGESTION
-    print("\n[1/7] Data Ingestion")
+    print("\n[1/8] Data Ingestion")
     provider = YahooFinanceProvider(ticker="AAPL", period="5y")
     observations = provider.extract()
     print(f"    Fetched {len(observations):,} observations for {provider.ticker}.")
@@ -68,16 +70,17 @@ def main() -> None:
     print(f"    Columns: {list(df.columns)}")
 
     # 2. ALIGNMENT
-    print("\n[2/7] Time-Series Alignment")
+    print("\n[2/8] Time-Series Alignment")
     aligner = TimeSeriesAligner()
     df = aligner.resample_frequency(df, freq="D")
     df = aligner.forward_fill(df)
     print(f"    After alignment: {len(df):,} rows.")
 
     # 3. FEATURE ENGINEERING
-    print("\n[3/7] Feature Engineering")
+    print("\n[3/8] Feature Engineering")
     df["daily_return"] = df["Close"].pct_change()
-    df["target"] = (df["daily_return"].shift(-1) > 0).astype(int)
+    df["target_binary"] = (df["daily_return"].shift(-1) > 0).astype(int)
+    df["target_return"] = df["daily_return"].shift(-1)
     df = df.dropna()
     print(f"    After base features + dropna: {len(df):,} rows.")
 
@@ -98,9 +101,18 @@ def main() -> None:
         "Close_ma_20",
     ]
 
-    # 4. EVALUATION
-    print("\n[4/7] Walk-Forward Evaluation")
-    strategy = XGBoostStrategy(
+    # Shared infrastructure
+    splitter = WalkForwardSplitter(
+        train_size=500,
+        test_size=100,
+        window_type="rolling",
+    )
+    scaler = ZScoreScaler()
+    shared_transformer = TimeSeriesTransformer()
+
+    # 4. XGBOOST EVALUATION
+    print("\n[4/8] Walk-Forward Evaluation – XGBoost")
+    xgb_strategy = XGBoostStrategy(
         hyperparams={
             "n_estimators": 100,
             "max_depth": 3,
@@ -108,49 +120,81 @@ def main() -> None:
             "verbosity": 0,
         }
     )
-    splitter = WalkForwardSplitter(
-        train_size=500,
-        test_size=20,
-        window_type="rolling",
-    )
-    scaler = ZScoreScaler()
-    evaluator = WalkForwardEvaluator(
-        strategy=strategy,
+    xgb_evaluator = WalkForwardEvaluator(
+        strategy=xgb_strategy,
         splitter=splitter,
-        transformer=TimeSeriesTransformer(),
+        transformer=shared_transformer,
         scaler=scaler,
     )
-    results_df = evaluator.evaluate(df, target_col="target", feature_cols=feature_cols)
-    print(f"    Out-of-sample predictions: {len(results_df):,} rows.")
+    xgb_results = xgb_evaluator.evaluate(
+        df, target_col="target_binary", feature_cols=feature_cols
+    )
+    print(f"    XGBoost out-of-sample predictions: {len(xgb_results):,} rows.")
 
-    # 5. SIMULATION
-    print("\n[5/7] Vectorized Back-test Simulation")
-    results_df = results_df.join(df[["daily_return"]], how="left")
+    # 5. XGBOOST SIMULATION & METRICS
+    print("\n[5/8] Vectorized Back-test Simulation – XGBoost")
+    xgb_results = xgb_results.join(df[["daily_return"]], how="left")
     simulator = VectorizedSimulator()
-    strategy_returns = simulator.simulate(
-        results_df,
+    xgb_strategy_returns = simulator.simulate(
+        xgb_results,
         signal_col="predicted",
         return_col="daily_return",
     )
-    print(f"    Simulated {len(strategy_returns):,} daily strategy returns.")
+    print(f"    Simulated {len(xgb_strategy_returns):,} daily XGBoost strategy returns.")
 
-    # 6. METRICS
-    print("\n[6/7] Financial Metrics")
-    metrics_df = pd.DataFrame({"strategy_returns": strategy_returns})
-    metrics = FinancialMetrics().calculate(
-        metrics_df,
+    print("\n    XGBoost Financial Metrics:")
+    xgb_metrics_df = pd.DataFrame({"strategy_returns": xgb_strategy_returns})
+    xgb_metrics = FinancialMetrics().calculate(
+        xgb_metrics_df,
         actual_col="strategy_returns",
         pred_col="strategy_returns",
     )
-    for key, value in metrics.items():
-        print(f"    {key:20s}: {value:+.4f}")
+    for key, value in xgb_metrics.items():
+        print(f"        {key:20s}: {value:+.4f}")
 
-    # 7. PLOTTING
-    print("\n[7/7] Tearsheet Plotting")
-    fig = plot_financial_tearsheet(strategy_returns)
-    output_path = os.path.join(_SCRIPT_DIR, "tearsheet.png")
-    fig.savefig(output_path, dpi=150)
-    print(f"    Saved tearsheet to: {output_path}")
+    fig_xgb = plot_financial_tearsheet(xgb_strategy_returns)
+    xgb_plot_path = os.path.join(_SCRIPT_DIR, "tearsheet_xgb.png")
+    fig_xgb.savefig(xgb_plot_path, dpi=150)
+    print(f"    Saved XGBoost tearsheet to: {xgb_plot_path}")
+
+    # 6. PPO EVALUATION
+    print("\n[6/8] Walk-Forward Evaluation – PPO Agent")
+    ppo_strategy = PPOStrategy(total_timesteps=2000)
+    ppo_evaluator = WalkForwardEvaluator(
+        strategy=ppo_strategy,
+        splitter=splitter,
+        transformer=shared_transformer,
+        scaler=scaler,
+    )
+    ppo_results = ppo_evaluator.evaluate(
+        df, target_col="target_return", feature_cols=feature_cols
+    )
+    print(f"    PPO out-of-sample predictions: {len(ppo_results):,} rows.")
+
+    # 7. PPO SIMULATION & METRICS
+    print("\n[7/8] Vectorized Back-test Simulation – PPO Agent")
+    ppo_results = ppo_results.join(df[["daily_return"]], how="left")
+    ppo_strategy_returns = simulator.simulate(
+        ppo_results,
+        signal_col="predicted",
+        return_col="daily_return",
+    )
+    print(f"    Simulated {len(ppo_strategy_returns):,} daily PPO strategy returns.")
+
+    print("\n    PPO Financial Metrics:")
+    ppo_metrics_df = pd.DataFrame({"strategy_returns": ppo_strategy_returns})
+    ppo_metrics = FinancialMetrics().calculate(
+        ppo_metrics_df,
+        actual_col="strategy_returns",
+        pred_col="strategy_returns",
+    )
+    for key, value in ppo_metrics.items():
+        print(f"        {key:20s}: {value:+.4f}")
+
+    fig_ppo = plot_financial_tearsheet(ppo_strategy_returns)
+    ppo_plot_path = os.path.join(_SCRIPT_DIR, "tearsheet_ppo.png")
+    fig_ppo.savefig(ppo_plot_path, dpi=150)
+    print(f"    Saved PPO tearsheet to: {ppo_plot_path}")
 
     print("\n" + "=" * 60)
     print(" Pipeline complete!")
