@@ -21,6 +21,7 @@ dependencies = [
     "joblib",
     "matplotlib",
     "yfinance",
+    "duckdb",
 ]
 
 [tool.setuptools.packages.find]
@@ -46,4 +47,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "xgboost"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "duckdb"
 ignore_missing_imports = true
