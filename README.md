@@ -17,15 +17,17 @@ A defining characteristic of the framework is its **zero-tolerance policy for da
 
 Most open-source ML toolkits treat time-series as an afterthought. Standard `fit`/`predict` patterns encourage leakage by allowing global statistics to bleed into historical folds. `quant-frame` inverts this paradigm through a **contract-first architecture** centered on the `BaseModelStrategy` interface.
 
-The `BaseModelStrategy` contract defines a uniform API across three paradigms:
+The `BaseModelStrategy` contract defines a uniform API across five paradigms:
 
 | Paradigm | Implementation | Strategy |
 |---|---|---|
 | **Supervised Learning** | Gradient-boosted trees via **XGBoost** | `XGBoostStrategy` |
 | **Unsupervised Learning** | Gaussian Hidden Markov Models via **hmmlearn** | `GaussianHMMStrategy` |
 | **Deep Reinforcement Learning** | Proximal Policy Optimization via **Stable-Baselines3** | `PPOStrategy` |
+| **Meta-Learning** | Model averaging & stacking via **EnsembleStrategy** | `EnsembleStrategy` |
+| **Agentic Debates** | LLM persona-driven allocation debates via **LLMStrategy** | `LLMStrategy` |
 
-Because every strategy adheres to the same contract, the `WalkForwardEvaluator` is completely agnostic to the underlying algorithm. Swapping from a supervised classifier to an RL agent is a one-line change—no pipeline refactoring required. The framework handles stateful scaler fitting, temporal alignment, and gymnasium environment construction transparently.
+Because every strategy adheres to the same contract, the `WalkForwardEvaluator` is completely agnostic to the underlying algorithm. Swapping from a supervised classifier to an RL agent, an ensemble meta-learner, or an LLM debate panel is a one-line change—no pipeline refactoring required. The framework handles stateful scaler fitting, temporal alignment, gymnasium environment construction, ensemble weight optimization, and LLM persona orchestration transparently.
 
 ## Features
 
@@ -33,6 +35,8 @@ Because every strategy adheres to the same contract, the `WalkForwardEvaluator` 
 - **Stateful Scalers** – `ZScoreScaler` and future transforms are fit exclusively on the in-sample portion of each walk-forward window and applied out-of-sample.
 - **Leak-Proof Walk-Forward Evaluator** – Rolling or expanding window splits coupled with per-fold feature engineering eliminate look-ahead bias at every stage.
 - **Domain-Agnostic RL Gym** – A custom `gymnasium` environment wraps any time-series DataFrame into a stateful MDP, enabling off-the-shelf DRL via Stable-Baselines3.
+- **Mathematical Meta-Learners** – Combine heterogeneous base strategies via `EnsembleStrategy`. Supports arithmetic averaging, geometric mean, and custom stacking weights computed strictly inside each walk-forward window.
+- **LLM Multi-Agent Debates** – Orchestrate allocation debates across user-defined text personas with `LLMStrategy`. Strictly domain-agnostic: the framework imposes no financial ontology; all reasoning stems from the provided persona prompts and raw feature vectors.
 - **Vectorized Tearsheet Simulation** – Back-test signals against realized returns with a fully vectorized engine, then generate publication-ready tear sheets with Sharpe, Sortino, max drawdown, and cumulative P&L curves.
 
 ## Installation
@@ -51,6 +55,14 @@ Includes test runners, type checkers, and documentation generators:
 
 ```bash
 pip install -e ".[dev]"
+```
+
+### LLM-Enabled Installation
+
+If you plan to use the OpenAI-backed `LLMStrategy` for multi-agent debates, install with the optional `llm` extra (includes `openai` and related dependencies):
+
+```bash
+pip install -e ".[dev,llm]"
 ```
 
 ## Quickstart
