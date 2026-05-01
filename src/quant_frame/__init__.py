@@ -14,6 +14,8 @@ from .core.validators import ThresholdValidator
 from .performance import FinancialMetrics, plot_financial_tearsheet, VectorizedSimulator
 from .repository.postgres_repo import SQLAlchemyRepository
 from .rl import AllocationEnv
+from .strategies.ensemble_strategy import EnsembleStrategy
+from .strategies.llm_strategy import LLMStrategy
 from .strategies.xgboost_strategy import XGBoostStrategy
 from .validation.evaluator import WalkForwardEvaluator
 from .validation.splitter import WalkForwardSplitter
@@ -25,8 +27,10 @@ __all__ = [
     "BaseProvider",
     "BaseRepository",
     "CSVProvider",
+    "EnsembleStrategy",
     "FinancialMetrics",
     "hello_frame",
+    "LLMStrategy",
     "ModelRegistry",
     "PipelineConfig",
     "plot_financial_tearsheet",

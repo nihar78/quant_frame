@@ -26,7 +26,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "mypy", "pytest-cov", "mkdocs-material", "mkdocstrings[python]", "pandas-stubs", "types-PyYAML"]
+llm = ["openai", "pydantic"]
+dev = ["pytest", "mypy", "pytest-cov", "mkdocs-material", "mkdocstrings[python]", "pandas-stubs", "types-PyYAML", "openai", "pydantic"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -63,4 +64,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "stable_baselines3.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "openai"
 ignore_missing_imports = true
